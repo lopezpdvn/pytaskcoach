@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+# coding=utf-8
+
+'''taskcoach-category-efforts
+'''
+
+import sys
+from os import environ
+from os.path import pathsep
+from datetime import datetime, timedelta
+from argparse import ArgumentParser
+
+from pysyspol.taskcoach import (get_category_efforts, DEFAULT_DATETIME_FMT,
+    plot_category_efforts)
+
+stderro_fmt = '{}: {}'
+stderro_names = ('start', 'end', 'total_effort_time', 'total_time', 'effort_fraction')
+stderro_vals = []
+
+parser = ArgumentParser()
+parser.add_argument('category_subjects', nargs='*')
+parser.add_argument('-s', '--start')
+parser.add_argument('-e', '--end')
+parser.add_argument('-c', '--config-dirs', nargs='*')
+parser.add_argument('-p', '--img-out', nargs='*')
+parser.add_argument('-r', '--reverse', action='store_true')
+args = parser.parse_args()
+
+TASKCOACH_FP = (args.config_dirs if args.config_dirs
+        else environ['SYSPOL_TASKCOACH_FP'].split(pathsep))
+CATEGORIES = (args.category_subjects if args.category_subjects
+    else environ['SYSPOL_TASKCOACH_CATEGORY_EFFORT_VIEWER_DEFAULT_CATEGORIES']\
+            .split())
+START = datetime.strptime(args.start if args.start
+    else environ['SYSPOL_TASKCOACH_CATEGORY_EFFORT_VIEWER_DEFAULT_START'],
+    DEFAULT_DATETIME_FMT)
+stderro_vals.append(START)
+try:
+    END = datetime.strptime(args.end if args.end
+        else environ['SYSPOL_TASKCOACH_CATEGORY_EFFORT_VIEWER_DEFAULT_END'],
+        DEFAULT_DATETIME_FMT)
+except (KeyError, ValueError):
+    END = None
+stderro_vals.append(END)
+
+try:
+    IMG_PLOT_FP = (args.img_out if args.img_out else
+        environ['SYSPOL_TASKCOACH_CATEGORY_EFFORT_VIEWER_DEFAULT_IMG_PLOT_FP']\
+        .split(pathsep))
+except ValueError:
+    IMG_PLOT_FP = ()
+
+# config done
+
+out = tuple((category, effort) for category, effort in
+        get_category_efforts(CATEGORIES, START, END, paths=TASKCOACH_FP))
+total_effort = sum(record[1] for record in out)
+stderro_vals.append(timedelta(seconds=total_effort))
+if total_effort:
+    out = [(category, effort, effort / total_effort)
+            for category, effort in out]
+else:
+    out = [(category, effort, None)
+            for category, effort in out]
+
+out.sort(key=lambda record: record[1], reverse=args.reverse)
+try:
+    end = (END - START).total_seconds()
+except TypeError:
+    end = datetime.now()
+total_time = (end - START).total_seconds()
+stderro_vals.append(timedelta(seconds=total_time))
+stderro_vals.append(total_effort / total_time)
+
+for record in out:
+    print('\t'.join(str(i) for i in record))
+
+print(file=sys.stderr)
+for i, stderro_val in enumerate(stderro_vals):
+    print(stderro_fmt.format(stderro_names[i], stderro_val), file=sys.stderr)
+
+plot_category_efforts(out, IMG_PLOT_FP)
+
+# vim: ft=python
