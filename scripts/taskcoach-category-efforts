@@ -10,7 +10,8 @@ from os.path import pathsep
 from datetime import datetime, timedelta
 from argparse import ArgumentParser
 
-from pysyspol.taskcoach import (get_category_efforts, DEFAULT_DATETIME_FMT,
+sys.path.append(environ['PYTASKCOACH'])
+from pytaskcoach import (get_category_efforts, DEFAULT_DATETIME_FMT,
     plot_category_efforts)
 
 stderro_fmt = '{}: {}'
