@@ -1,3 +1,4 @@
+import sys
 from xml.etree.ElementTree import parse
 from os.path import isdir, join
 from glob import iglob
@@ -68,8 +69,48 @@ def get_categorizables(category, taskfile_path):
         tsk = doc.find(matcher)
         yield tsk.get('id')
 
-def get_categories():
-    return ()
+def validate_tskfile(tskfp):
+    """Validate single TaskCoach files
+
+    Parameters
+    ----------
+    tskfp: str
+        Path to a TaskCoach file
+
+    Returns
+    -------
+
+    ``True`` if TaskCoach file valid, else ``False``
+    """
+    invalid = list(get_tasks_missing_parent_categories(tskfp))
+    if invalid:
+        for i in invalid:
+            tsksubject = i.get('subject')
+            print('Invalid TaskCoach file `{}`'.format(tsksubject),
+                    file=sys.stderr)
+
+    return not invalid
+
+def validate(tskpaths):
+    """Validate set of TaskCoach files
+
+    Parameters
+    ----------
+
+    tskpaths: Iterable of strings
+        Each string is a path to a dir with TaskCoach files as direct
+        children
+
+    Returns
+    -------
+
+    ``True`` if all TaskCoach files valid, else ``False``
+    """
+    for dirpath in tskpaths:
+        for tskfp in iglob(join(dirpath, '*'+file_ext)):
+            if not validate_tskfile(tskfp):
+                return False
+    return True
 
 def get_category_efforts(categories=(), start=None, end=None, *, paths=None):
     if start is None:

@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 
 sys.path.append(environ['PYTASKCOACH'])
 from pytaskcoach import (get_category_efforts, DEFAULT_DATETIME_FMT,
-    plot_category_efforts)
+    plot_category_efforts, validate)
 
 stderro_fmt = '{}: {}'
 stderro_names = ('start', 'end', 'total_effort_time', 'total_time', 'effort_fraction')
@@ -53,6 +53,7 @@ except ValueError:
 
 # config done
 
+assert validate(TASKCOACH_FP)
 out = tuple((category, effort) for category, effort in
         get_category_efforts(CATEGORIES, START, END, paths=TASKCOACH_FP))
 total_effort = sum(record[1] for record in out)
