@@ -25,6 +25,7 @@ parser.add_argument('-e', '--end')
 parser.add_argument('-c', '--config-dirs', nargs='*')
 parser.add_argument('-p', '--img-out', nargs='*')
 parser.add_argument('-r', '--reverse', action='store_true')
+parser.add_argument('-V', '--validate', action='store_true')
 args = parser.parse_args()
 
 TASKCOACH_FP = (args.config_dirs if args.config_dirs
@@ -53,7 +54,9 @@ except ValueError:
 
 # config done
 
-assert validate(TASKCOACH_FP)
+if args.validate:
+    assert validate(TASKCOACH_FP)
+
 out = tuple((category, effort) for category, effort in
         get_category_efforts(CATEGORIES, START, END, paths=TASKCOACH_FP))
 total_effort = sum(record[1] for record in out)

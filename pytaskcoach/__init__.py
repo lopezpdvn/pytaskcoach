@@ -82,12 +82,12 @@ def validate_tskfile(tskfp):
 
     ``True`` if TaskCoach file valid, else ``False``
     """
+    MSGTMPL = 'Invalid task with subject `{}` in file `{}`'
     invalid = list(get_tasks_missing_parent_categories(tskfp))
     if invalid:
         for i in invalid:
             tsksubject = i.get('subject')
-            print('Invalid TaskCoach file `{}`'.format(tsksubject),
-                    file=sys.stderr)
+            print(MSGTMPL.format(tsksubject, tskfp), file=sys.stderr)
 
     return not invalid
 
