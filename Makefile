@@ -9,6 +9,7 @@ PYTHON = python3
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  test         Run unit tests"
+	@echo "  push         Push selected branches to GitHub repository"
 
 test:
 	@$(PYTHON) -m unittest discover -v -s $(TESTS_DIR) -p $(TESTS_FP_PREFIX)

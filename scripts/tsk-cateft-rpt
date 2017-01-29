@@ -42,7 +42,7 @@ try:
         else environ['SYSPOL_TASKCOACH_CATEGORY_EFFORT_VIEWER_DEFAULT_END'],
         DEFAULT_DATETIME_FMT)
 except (KeyError, ValueError):
-    END = None
+    END = datetime.now()
 stderro_vals.append(END)
 
 try:
@@ -69,11 +69,7 @@ else:
             for category, effort in out]
 
 out.sort(key=lambda record: record[1], reverse=args.reverse)
-try:
-    end = (END - START).total_seconds()
-except TypeError:
-    end = datetime.now()
-total_time = (end - START).total_seconds()
+total_time = (END - START).total_seconds()
 stderro_vals.append(timedelta(seconds=total_time))
 stderro_vals.append(total_effort / total_time)
 
