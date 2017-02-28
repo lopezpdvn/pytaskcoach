@@ -128,16 +128,6 @@ def get_category_efforts(categories=(), start=None, end=None, *, paths=None):
     for ctg, eff in efforts.items():
         yield (ctg, eff.total_seconds())
 
-def plot_category_efforts(data, fnames=()):
-    if not len(fnames):
-        return
-    categories = tuple(record[0] for record in data)
-    effort = tuple(record[1] for record in data)
-    plt.pie(effort, labels=categories, shadow=True)
-    plt.axis('equal')
-    for fname in fnames:
-        plt.savefig(fname)
-
 def _tsk_file_get_category_efforts(categories, tskfp, start, end):
     doc = parse(tskfp)
 
