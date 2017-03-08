@@ -113,20 +113,14 @@ def validate(tskpaths):
     return True
 
 def get_category_efforts(categories=(), start=None, end=None, *, paths=None):
-    if start is None:
-        start = datetime.now() - DEFAULT_TIMEDELTA
-
     efforts = {}
-    if paths is not None:
-        for path in paths:
-            if isdir(path):
-                for tsk in iglob(join(path, '*'+file_ext)):
-                    for ctg, eff in _tsk_file_get_category_efforts(categories,
-                            tsk, start, end):
-                        efforts[ctg] = efforts.get(ctg, timedelta()) + eff
+    for path in paths:
+        for tsk in iglob(join(path, '*'+file_ext)):
+            for ctg, eff in _tsk_file_get_category_efforts(categories,
+                    tsk, start, end):
+                efforts[ctg] = efforts.get(ctg, timedelta()) + eff
 
-    for ctg, eff in efforts.items():
-        yield (ctg, eff.total_seconds())
+    return efforts.items()
 
 def _tsk_file_get_category_efforts(categories, tskfp, start, end):
     doc = parse(tskfp)
