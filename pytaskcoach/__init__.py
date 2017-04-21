@@ -4,8 +4,6 @@ from os.path import isdir, join
 from glob import iglob
 from datetime import datetime, timedelta
 
-import matplotlib.pyplot as plt
-
 # syspol reference
 file_ext = '.tsk'
 
