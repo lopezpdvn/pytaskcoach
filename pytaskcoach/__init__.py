@@ -61,7 +61,10 @@ def get_categorizables(category, taskfile_path):
     matcher_tmpl = ".//task[@id='{}']"
     doc = parse(taskfile_path)
     tskids = category.get('categorizables')
-    assert tskids
+    if not tskids:
+        errormsg = 'Category `{}` at taskfile `{}` has no tasks'.format(
+                category.get('subject'), taskfile_path)
+        raise AssertionError(errormsg)
     for tskid in tskids.split():
         matcher = matcher_tmpl.format(tskid)
         tsk = doc.find(matcher)
