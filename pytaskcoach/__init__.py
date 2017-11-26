@@ -123,6 +123,17 @@ def get_category_efforts(categories=(), start=None, end=None, *, paths=None):
 
     return efforts.items()
 
+def get_category_efforts_details(categories=(), start=None, end=None, *,
+        paths=None):
+    tskefts = []
+    for path in paths:
+        for tsk in iglob(join(path, '*'+file_ext)):
+            for tskeft in _tsk_file_get_category_efforts_details(categories,
+                    tsk, start, end):
+                tskefts.append(tskeft)
+
+    return tskefts
+
 def _tsk_file_get_category_efforts(categories, tskfp, start, end):
     doc = parse(tskfp)
 
@@ -139,6 +150,27 @@ def _tsk_file_get_category_efforts(categories, tskfp, start, end):
             yield (subjsel, effort_time)
         except AttributeError:
             continue
+
+def _tsk_file_get_category_efforts_details(categories, tskfp, start, end):
+    tskefts = []
+    doc = parse(tskfp)
+
+    for subjsel in categories:
+        effort_time = timedelta()
+        match = (XPATH_MATCH_PREFIX +
+                XPATHSEP.join("category[@subject='{}']".format(i)
+                    for i in subjsel.split(XPATHSEP)))
+        category = doc.find(match)
+        try:
+            tasks = category.get('categorizables')
+            for taskid in tasks.split():
+                for tskeft in get_task_efforts(taskid, tskfp, start, end):
+                    tskeft['category'] = subjsel
+                    tskefts.append(tskeft)
+        except AttributeError:
+            continue
+
+    return tskefts
 
 def get_task_effort(tskid, tskfp, start, end=None):
     effort_time = timedelta()
@@ -164,3 +196,27 @@ def get_task_effort(tskid, tskfp, start, end=None):
         effort_time += effort_end - effort_start
 
     return effort_time
+
+def get_task_efforts(tskid, tskfp, start, end=None):
+    tskefts = []
+    doc = parse(tskfp)
+    task = doc.find(".//task[@id='{}']".format(tskid))
+    if task is None:
+        return tskefts
+
+    for effort in task.iterfind('effort'):
+        tskeft = {'task': tskid}
+        try:
+            tskeft['start'] = datetime.strptime(effort.get('start'),
+                    DEFAULT_DATETIME_FMT)
+            tskeft['end'] = datetime.strptime(effort.get('stop'),
+                    DEFAULT_DATETIME_FMT)
+        except TypeError:
+            continue
+        if tskeft['start'] < start:
+            continue
+        if tskeft['end'] is not None and tskeft['end'] > end:
+            continue
+        tskefts.append(tskeft)
+
+    return tskefts
