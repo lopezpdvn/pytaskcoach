@@ -10,7 +10,7 @@ file_ext = '.tsk'
 DEFAULT_TIMEDELTA = timedelta(weeks=1)
 DEFAULT_DATETIME_FMT = '%Y-%m-%d %H:%M:%S'
 XPATHSEP = '/'
-XPATH_MATCH_PREFIX = '.{0}{0}'.format(XPATHSEP)
+XPATH_MATCH_PREFIX = '.{0}'.format(XPATHSEP)
 
 def get_tasks_missing_parent_categories(taskfile_path):
     """Tasks with missing parent categories
