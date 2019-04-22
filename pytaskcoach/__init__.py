@@ -11,6 +11,8 @@ DEFAULT_TIMEDELTA = timedelta(weeks=1)
 DEFAULT_DATETIME_FMT = '%Y-%m-%d %H:%M:%S'
 XPATHSEP = '/'
 XPATH_MATCH_PREFIX = '.{0}'.format(XPATHSEP)
+CATEGORY_ELEMENT_NAME = 'category'
+CATEGORY_ELEMENT_SUBJECT_ATTRIBUTE_NAME = 'subject'
 
 def get_tasks_missing_parent_categories(taskfile_path):
     """Tasks with missing parent categories
@@ -220,3 +222,15 @@ def get_task_efforts(tskid, tskfp, start, end=None):
         tskefts.append(tskeft)
 
     return tskefts
+
+def get_categories(paths):
+    for path in paths:
+        for tsk_fp in iglob(join(path, '*'+file_ext)):
+            for category in get_categories_tsk_fp(tsk_fp):
+                yield category
+
+def get_categories_tsk_fp(tsk_fp):
+    doc = parse(tsk_fp)
+    matcher = XPATH_MATCH_PREFIX + CATEGORY_ELEMENT_NAME
+    for category in doc.iterfind(matcher):
+        yield category.get(CATEGORY_ELEMENT_SUBJECT_ATTRIBUTE_NAME)
