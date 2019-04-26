@@ -229,8 +229,16 @@ def get_categories(paths):
             for category in get_categories_tsk_fp(tsk_fp):
                 yield category
 
-def get_categories_tsk_fp(tsk_fp):
+def get_categories_tsk_fp(tsk_fp,
+                matcher=XPATH_MATCH_PREFIX + CATEGORY_ELEMENT_NAME):
     doc = parse(tsk_fp)
-    matcher = XPATH_MATCH_PREFIX + CATEGORY_ELEMENT_NAME
     for category in doc.iterfind(matcher):
-        yield category.get(CATEGORY_ELEMENT_SUBJECT_ATTRIBUTE_NAME)
+        yield from get_category_subcategories(category, matcher)
+
+def get_category_subcategories(category, matcher, prefix=''):
+    category_subject = (
+            prefix + category.get(CATEGORY_ELEMENT_SUBJECT_ATTRIBUTE_NAME))
+    yield category_subject
+    for subcategory in category.iterfind(matcher):
+        yield from get_category_subcategories(
+                            subcategory, matcher, category_subject + XPATHSEP)
