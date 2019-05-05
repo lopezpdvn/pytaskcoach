@@ -62,14 +62,20 @@ def get_parent_categories(subcat, taskfile_path):
 def get_categorizables(category, taskfile_path):
     matcher_tmpl = ".//task[@id='{}']"
     doc = parse(taskfile_path)
-    tskids = category.get('categorizables')
-    if not tskids:
+    categorizable_ids = category.get('categorizables')
+    if not categorizable_ids:
         errormsg = 'Category `{}` at taskfile `{}` has no tasks'.format(
                 category.get('subject'), taskfile_path)
         raise AssertionError(errormsg)
-    for tskid in tskids.split():
+    for tskid in categorizable_ids.split():
         matcher = matcher_tmpl.format(tskid)
+
+        # find may not match an element because the categorizable id
+        # may be of an XML element with name != 'task'
         tsk = doc.find(matcher)
+        if not tsk:
+            continue
+
         yield tsk.get('id')
 
 def validate_tskfile(tskfp):
